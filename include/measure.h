@@ -1,25 +1,26 @@
+
 /*=======================================================================================*
- * @file    phameas.h
+ * @file    measure.h
  * @author  Marcin Badzioch
  * @version 1.0
- * @date    02-09-2017
- * @brief   Header file for Phase shift measurement module
+ * @date    19-05-2018
+ * @brief   Header file for universal measurement module
  *
- *          This file contains API of Phase shift measurement module
+ *          This file contains API of universal measurement module
  *======================================================================================*/
 /*----------------------- DEFINE TO PREVENT RECURSIVE INCLUSION ------------------------*/
 
+#ifndef MEASURE_H_
+#define MEASURE_H_
 
-#ifndef PHAMEAS_H_
-#define PHAMEAS_H_
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /**
- * @addtogroup Phameas Description
+ * @addtogroup Unimeas Description
  * @{
- * @brief Phase shift measurement module
+ * @brief Universal measurement module
  */
 
 /*======================================================================================*/
@@ -37,40 +38,49 @@ extern "C" {
 /*---------------------------- ALL TYPE DECLARATIONS -----------------------------------*/
 
 /*------------------------------------- ENUMS ------------------------------------------*/
-typedef enum{
-	PHA_OK = 0,
-	PHA_TIMEOUT,
-}phameas_resp_E;
-/*------------------------------- STRUCT AND PHAONS ------------------------------------*/
+
+typedef enum {MEAS_IDLE,MEAS_FLOW,MEAS_MOIST,MEAS_FLAPCLOSE,MEAS_FLAPOPEN,MEAS_ERROR
+				} measure_state_T;
+/*------------------------------- STRUCT AND UNIONS ------------------------------------*/
+typedef struct{
+	uint8_t idle_flag;
+	uint8_t flow_rec_num;
+	uint8_t moist_rec_num;
+}measure_set_T;
 
 typedef struct{
+	uint16_t timestamp;
+	uint16_t moist;
+	uint16_t flow;
+	int16_t  temp_z;
+	int16_t  temp_in;
+	int16_t  temp_out;
+	uint8_t hum_in;
+	uint8_t hum_out;
 	uint16_t phase;
-}phaMeasGetS;
+	uint16_t amp_r;
+	uint16_t amp_c;
+}measure_record_T;
 /*======================================================================================*/
 /*                    ####### EXPORTED OBJECT DECLARATIONS #######                      */
 /*======================================================================================*/
-typedef struct{
-	uint16_t phase;
-	uint8_t timeout_flag;
-}phasemeas_filtered_T;
+
 /*======================================================================================*/
 /*                   ####### EXPORTED FUNCTIONS PROTOTYPES #######                      */
 /*======================================================================================*/
-phameas_resp_E PhaMeas_Init(void);
-phameas_resp_E PhaMeas_Get(void);
+void Measure_Init(void);
+void Measure_Main();
+void Measure_Set(measure_set_T measure_set_S);
+void Measure_CallibSequence(uint8_t mode);
 /*======================================================================================*/
 /*                          ####### INLINE FUNCTIONS #######                            */
 /*======================================================================================*/
 
 /**
- * @} end of group Phameas
+ * @} end of group Measure
  */
 
 #ifdef __cplusplus
 }
 #endif
-#endif /* PHAMEAS_H_ */
-
-
-
-
+#endif /* MEASURE_H_ */

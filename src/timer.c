@@ -136,6 +136,15 @@ void Timer_Handler()
 		}
 	}
 }
+
+void TIM2_IRQHandler()
+{
+	if(TIM_GetITStatus(TIM2,TIM_IT_Update) != RESET){
+		disk_timerproc();
+		Timer_Handler();
+		TIM_ClearITPendingBit(TIM2,TIM_IT_Update);
+	}
+}
 /*void TIM1_BRK_TIM9_IRQHandler()
 {
 	if(TIM_GetITStatus(TIM9,TIM_IT_Update) != RESET){

@@ -1,25 +1,26 @@
 /*=======================================================================================*
- * @file    phameas.h
- * @author  Marcin Badzioch
+ * @file    flapcrtl.h.h
+ * @author  Marcin
  * @version 1.0
- * @date    02-09-2017
- * @brief   Header file for Phase shift measurement module
+ * @date    17 maj 2018
+ * @brief   
  *
- *          This file contains API of Phase shift measurement module
+ *          
  *======================================================================================*/
 /*----------------------- DEFINE TO PREVENT RECURSIVE INCLUSION ------------------------*/
 
 
-#ifndef PHAMEAS_H_
-#define PHAMEAS_H_
+#ifndef flapcrtl.h_H
+#define flapcrtl.h_H
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /**
- * @addtogroup Phameas Description
+ * @addtogroup flapcrtl.h Description
  * @{
- * @brief Phase shift measurement module
+ * @brief 
  */
 
 /*======================================================================================*/
@@ -28,7 +29,7 @@ extern "C" {
 /*-------------------------------- INCLUDE DIRECTIVES ----------------------------------*/
 #include "stdio.h"
 /*----------------------------- LOCAL OBJECT-LIKE MACROS -------------------------------*/
-
+#define FLAP_OPEN_TIMEOUT	30		// In sec
 /*---------------------------- LOCAL FUNCTION-LIKE MACROS ------------------------------*/
 
 /*======================================================================================*/
@@ -37,40 +38,29 @@ extern "C" {
 /*---------------------------- ALL TYPE DECLARATIONS -----------------------------------*/
 
 /*------------------------------------- ENUMS ------------------------------------------*/
-typedef enum{
-	PHA_OK = 0,
-	PHA_TIMEOUT,
-}phameas_resp_E;
-/*------------------------------- STRUCT AND PHAONS ------------------------------------*/
+typedef enum {FLAP_OPENED,FLAP_OPENING,FLAP_CLOSED,FLAP_CLOSING,FLAP_ERROR}flap_state_T;
+typedef enum {FLAP_CMD_OPEN,FLAP_CMD_CLOSE}flap_cmd_T;
+/*------------------------------- STRUCT AND UNIONS ------------------------------------*/
 
-typedef struct{
-	uint16_t phase;
-}phaMeasGetS;
 /*======================================================================================*/
 /*                    ####### EXPORTED OBJECT DECLARATIONS #######                      */
 /*======================================================================================*/
-typedef struct{
-	uint16_t phase;
-	uint8_t timeout_flag;
-}phasemeas_filtered_T;
+
 /*======================================================================================*/
 /*                   ####### EXPORTED FUNCTIONS PROTOTYPES #######                      */
 /*======================================================================================*/
-phameas_resp_E PhaMeas_Init(void);
-phameas_resp_E PhaMeas_Get(void);
+
+void FLAP_Init(void);
+flap_state_T FLAP_Control(flap_cmd_T flap_cmd_set);
 /*======================================================================================*/
 /*                          ####### INLINE FUNCTIONS #######                            */
 /*======================================================================================*/
 
 /**
- * @} end of group Phameas
+ * @} end of group flapcrtl.h
  */
 
 #ifdef __cplusplus
 }
 #endif
-#endif /* PHAMEAS_H_ */
-
-
-
-
+#endif /* flapcrtl.h_H */

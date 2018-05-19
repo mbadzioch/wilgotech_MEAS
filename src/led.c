@@ -22,7 +22,7 @@ NVIC_InitTypeDef		   		NVIC_InitStructure;
 
 uint8_t LED_GreenFreq,LED_BlueFreq,LED_RedFreq,LED_GreenBlinkNum,LED_RedBlinkNum,LED_BlueBlinkNum,LED_GBFlag,LED_RBFlag,LED_BBFlag;
 
-void LED_Config(void)
+void LED_Init(void)
 {
 	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOA, ENABLE);
 	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOC, ENABLE);

@@ -52,13 +52,8 @@ static void HRTIM_Config(void);
 /*--------------------------------- EXPORTED OBJECTS -----------------------------------*/
 
 /*---------------------------------- LOCAL OBJECTS -------------------------------------*/
-struct{
-	uint8_t timeoutFlag;
-}phaInfo;
 
-struct{
-	uint16_t phase;
-}phaMeasures;
+phasemeas_filtered_T phasemeas_filtered_data;
 
 volatile uint32_t fiVal=0;
 volatile uint16_t fiSampleCounter=0,fiValA=0,fiValB=0,fiValAvg=0;
@@ -66,21 +61,20 @@ volatile uint8_t  fiMeasOnFlag=0;
 /*======================================================================================*/
 /*                  ####### EXPORTED FUNCTIONS DEFINITIONS #######                      */
 /*======================================================================================*/
-phaMeasResp PhaMeas_Init(void)
+phameas_resp_E PhaMeas_Init(void)
 {
 	HRTIM_Port_Config();
 	HRTIM_Interrupt_Config();
 	HRTIM_Config();
 
-	phaInfo.timeoutFlag=0;
+	phasemeas_filtered_data.timeout_flag=0;
 	return PHA_OK;
 }
-phaMeasResp PhaMeas_Get(phaMeasGetS* phaMeasGet)
+phameas_resp_E PhaMeas_Get()
 {
-	phaInfo.timeoutFlag=0;
+	phasemeas_filtered_data.timeout_flag=0;
 	PHA_Measure();
-	phaMeasGet->phase=phaMeasures.phase;
-	if(phaInfo.timeoutFlag==1)return PHA_TIMEOUT;
+	if(phasemeas_filtered_data.timeout_flag==1)return PHA_TIMEOUT;
 	else return PHA_OK;
 }
 
@@ -97,13 +91,13 @@ static void PHA_Measure()
 	while(fiMeasOnFlag){
 		fiTimeout++;
 		if(fiTimeout > 500000){
-			phaInfo.timeoutFlag=1;
+			phasemeas_filtered_data.timeout_flag=1;
 			break;
 		}
 	}
 	HRTIM_ITConfig(HRTIM1,0,HRTIM_TIM_IT_CPT2,DISABLE);
 
-	phaMeasures.phase = fiValAvg;
+	phasemeas_filtered_data.phase = fiValAvg;
 }
 
 static void HRTIM_Port_Config(void)

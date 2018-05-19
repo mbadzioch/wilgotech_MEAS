@@ -37,18 +37,20 @@ extern "C" {
 /*---------------------------- ALL TYPE DECLARATIONS -----------------------------------*/
 
 /*------------------------------------- ENUMS ------------------------------------------*/
-typedef enum ThMeas_Rsp_Tag
+typedef enum
 {
 	TH_OK = 0,
 	TH_TIMEOUT,
 	TH_NO_SENS_IN,
 	TH_NO_SENS_OUT,
-} ThMeas_Rsp_T;
+} thmeas_resp_E;
 /*------------------------------- STRUCT AND THONS ------------------------------------*/
 typedef struct{
 	uint16_t humIn,humOut;
 	int16_t tempIn,tempOut;
-}thMeasGetS;
+	uint16_t tempRaw,humRaw;
+	uint8_t sensInPresentFlag,sensOutPresentFlag;
+}thmeas_data_T;
 /*======================================================================================*/
 /*                    ####### EXPORTED OBJECT DECLARATIONS #######                      */
 /*======================================================================================*/
@@ -56,8 +58,8 @@ typedef struct{
 /*======================================================================================*/
 /*                   ####### EXPORTED FUNCTIONS PROTOTYPES #######                      */
 /*======================================================================================*/
-ThMeas_Rsp_T ThMeas_Init(void);
-ThMeas_Rsp_T ThMeas_Get(thMeasGetS * const thMeasGet);
+thmeas_resp_E ThMeas_Init(void);
+thmeas_resp_E ThMeas_Get(void);
 /*======================================================================================*/
 /*                          ####### INLINE FUNCTIONS #######                            */
 /*======================================================================================*/

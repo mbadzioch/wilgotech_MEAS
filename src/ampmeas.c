@@ -44,12 +44,19 @@
 /*======================================================================================*/
 static void ADC_Port_Config(void);
 static void ADC_Config(void);
-static int16_t TempLinCalc(uint16_t adc);
+static int16_t ADC_TempLinCalc(uint16_t adc);
+
+static void ADC_CapacitorVoltageMeasure(void);
+static void ADC_ResistorVoltageMeasure(void);
+static void ADC_WheatTemperatureMeasure(void);
+static void ADC_BatteryVoltageMeasure(void);
 
 /*======================================================================================*/
 /*                         ####### OBJECT DEFINITIONS #######                           */
 /*======================================================================================*/
 /*--------------------------------- EXPORTED OBJECTS -----------------------------------*/
+
+ampmeas_filtered_data_T ampmeas_filtered_data;
 
 /*---------------------------------- LOCAL OBJECTS -------------------------------------*/
 /*int16_t tempTab[][2]={{4009,-200},
@@ -64,32 +71,37 @@ static int16_t TempLinCalc(uint16_t adc);
 		{3066,355},{3050,360},{3033,365},{3017,370},{3000,375},{2983,380},{2966,385},{2949,390},{2932,395},{2915,400},{2898,405},{2880,410},{2863,415},{2845,420},{2827,425},
 		{2809,430},{2791,435},{2773,440},{2755,445},{2737,450},{2719,455},{2701,460},{2682,465},{2664,470},{2645,475},{2627,480},{2608,485},{2589,490},{2571,495},{2552,500}};*/
 
-volatile uint32_t ampliC=0,ampliR=0;
-volatile uint16_t ampliCAvg=0,ampliRAvg=0,ampliSampleCnt=0;
-volatile uint8_t  adcChannel=0,ampliMeasReadyFlag=0;
+
+
+
 /*======================================================================================*/
 /*                  ####### EXPORTED FUNCTIONS DEFINITIONS #######                      */
 /*======================================================================================*/
-ampMeasResp AmpMeas_Init(void)
+ampmeas_resp_E AmpMeas_Init(void)
 {
 	ADC_Port_Config();
 	ADC_Config();
+	ADC_BatteryVoltageMeasure();
 	return AMP_OK;
 }
-ampMeasResp AmpMeas_Start(void)
+ampmeas_resp_E AmpMeas_Start(void)
 {
-	return AMP_OK;
+	return AMP_NOTUSED;
 }
-ampMeasResp AmpMeas_Stop(void)
+ampmeas_resp_E AmpMeas_Stop(void)
 {
-	return AMP_OK;
+	return AMP_NOTUSED;
 }
-ampMeasResp AmpMeas_Set(ampMeasSetS* ampMeasSet)
+ampmeas_resp_E AmpMeas_Set(void)
 {
-	return AMP_OK;
+	return AMP_NOTUSED;
 }
-ampMeasResp AmpMeas_Get(ampMeasGetS* ampMeasGet)
+ampmeas_resp_E AmpMeas_Get(void)
 {
+	ADC_CapacitorVoltageMeasure();
+	ADC_ResistorVoltageMeasure();
+	ADC_WheatTemperatureMeasure();
+
 	return AMP_OK;
 }
 /*======================================================================================*/
@@ -196,35 +208,36 @@ void ADC_Interrput_Config(void)
 	NVIC_InitStructure.NVIC_IRQChannelSubPriority=0;
 	NVIC_Init(&NVIC_InitStructure);
 }
-void AmpliMeasureC(measParamS* measBuff)
+static void ADC_CapacitorVoltageMeasure(void)
 {
 	uint32_t ampCAcc=0;
 
 	ADC_RegularChannelConfig(ADC2, ADC_Channel_14, 1, ADC_SampleTime_601Cycles5);
-	while(!ADC_GetFlagStatus(ADC1, ADC_FLAG_RDY));
+	while(!ADC_GetFlagStatus(ADC2, ADC_FLAG_RDY));
 	for(uint8_t i=0;i<32;i++){
 		ADC_StartConversion(ADC2);
 		while(ADC_GetFlagStatus(ADC2, ADC_FLAG_EOC) == RESET);
 		ampCAcc = ampCAcc + ADC_GetConversionValue(ADC2);
 	}
 
-	measBuff->ampliC =  ampCAcc >> 5;
+	ampmeas_filtered_data.amplitudeCapacitor =  ampCAcc >> 5;
 }
-void AmpliMeasureR(measParamS* measBuff)
+
+static void ADC_ResistorVoltageMeasure(void)
 {
 	uint32_t ampRAcc=0;
 	ADC_RegularChannelConfig(ADC2, ADC_Channel_15, 1, ADC_SampleTime_601Cycles5);
-	while(!ADC_GetFlagStatus(ADC1, ADC_FLAG_RDY));
+	while(!ADC_GetFlagStatus(ADC2, ADC_FLAG_RDY));
 	for(uint8_t i=0;i<32;i++){
 		ADC_StartConversion(ADC2);
 		while(ADC_GetFlagStatus(ADC2, ADC_FLAG_EOC) == RESET);
 		ampRAcc = ampRAcc + ADC_GetConversionValue(ADC2);
 	}
 
-	measBuff->ampliR =  ampRAcc >> 5;
+	ampmeas_filtered_data.amplitudeResistor =  ampRAcc >> 5;
 }
 
-static int16_t TempLinCalc(uint16_t adc)
+static int16_t ADC_TempLinCalc(uint16_t adc)
 {
 	double Temp;
 	Temp=adc;
@@ -233,7 +246,8 @@ static int16_t TempLinCalc(uint16_t adc)
 
 	return (int16_t)Temp;
 }
-void ThermistorMeasure(measParamS* measBuff)
+
+static void ADC_WheatTemperatureMeasure(void)
 {
 	uint32_t tempT=0;
 	ADC_RegularChannelConfig(ADC1, ADC_Channel_1, 1, ADC_SampleTime_601Cycles5);
@@ -243,9 +257,13 @@ void ThermistorMeasure(measParamS* measBuff)
 		while(ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC) == RESET);
 		tempT = tempT + ADC_GetConversionValue(ADC1);
 	}
-	measBuff->tempZboza =  TempLinCalc((tempT>>5)+TEMP_CALLIB);
+	ampmeas_filtered_data.wheatTemperature =  ADC_TempLinCalc((tempT>>5)+TEMP_CALLIB);
 }
-void VBATMeasure(measOtherS* measStartup)
+/*
+ * Only at startup?
+ */
+
+static void ADC_BatteryVoltageMeasure(void)
 {
 	uint32_t batMeas=0;
 	ADC_VbatCmd(ADC1, ENABLE);
@@ -256,22 +274,26 @@ void VBATMeasure(measOtherS* measStartup)
 	ADC_VbatCmd(ADC1, DISABLE);
 	batMeas = ADC_GetConversionValue(ADC1);
 	batMeas = (batMeas*6600)/4096;
-	measStartup->vBat = batMeas;
+
+	ampmeas_filtered_data.batteryVoltage = batMeas;
 }
-void TempInternalMeasure(measOtherS* measStartup)
-{
-	double tempMeas=0;
-	ADC_TempSensorCmd(ADC1, ENABLE);
-	ADC_RegularChannelConfig(ADC1, ADC_Channel_16, 1, ADC_SampleTime_601Cycles5);
-	while(!ADC_GetFlagStatus(ADC1, ADC_FLAG_RDY));
-	ADC_StartConversion(ADC1);
-	while(ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC) == RESET);
-	ADC_TempSensorCmd(ADC1, DISABLE);
-	tempMeas = ADC_GetConversionValue(ADC1);
-	tempMeas = (tempMeas*3.3)/4096;
-	tempMeas = ((1.43 - tempMeas)/ 0.0043)+25;
-	measStartup->tempProc = (uint16_t)(10*tempMeas);
-}
+/*
+ * Not needed
+ */
+//void TempInternalMeasure(measOtherS* measStartup)
+//{
+//	double tempMeas=0;
+//	ADC_TempSensorCmd(ADC1, ENABLE);
+//	ADC_RegularChannelConfig(ADC1, ADC_Channel_16, 1, ADC_SampleTime_601Cycles5);
+//	while(!ADC_GetFlagStatus(ADC1, ADC_FLAG_RDY));
+//	ADC_StartConversion(ADC1);
+//	while(ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC) == RESET);
+//	ADC_TempSensorCmd(ADC1, DISABLE);
+//	tempMeas = ADC_GetConversionValue(ADC1);
+//	tempMeas = (tempMeas*3.3)/4096;
+//	tempMeas = ((1.43 - tempMeas)/ 0.0043)+25;
+//	measStartup->tempProc = (uint16_t)(10*tempMeas);
+//}
 /**
  * @} end of group Ampmeas
  */

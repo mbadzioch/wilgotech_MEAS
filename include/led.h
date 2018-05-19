@@ -17,7 +17,7 @@ blinkLedE blinkingFreq;
 void LED_Green(blinkLedE blinkingFreq);
 void LED_Red(blinkLedE blinkingFreq);
 void LED_Blue(blinkLedE blinkingFreq);
-void LED_Config(void);
+void LED_Init(void);
 
 
 #endif /* LED_H_ */

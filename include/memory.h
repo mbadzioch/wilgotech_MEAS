@@ -1,25 +1,26 @@
 /*=======================================================================================*
- * @file    phameas.h
- * @author  Marcin Badzioch
+ * @file    memory.h.h
+ * @author  Marcin
  * @version 1.0
- * @date    02-09-2017
- * @brief   Header file for Phase shift measurement module
+ * @date    17 maj 2018
+ * @brief   
  *
- *          This file contains API of Phase shift measurement module
+ *          
  *======================================================================================*/
 /*----------------------- DEFINE TO PREVENT RECURSIVE INCLUSION ------------------------*/
 
 
-#ifndef PHAMEAS_H_
-#define PHAMEAS_H_
+#ifndef memory.h_H
+#define memory.h_H
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /**
- * @addtogroup Phameas Description
+ * @addtogroup memory.h Description
  * @{
- * @brief Phase shift measurement module
+ * @brief 
  */
 
 /*======================================================================================*/
@@ -37,40 +38,26 @@ extern "C" {
 /*---------------------------- ALL TYPE DECLARATIONS -----------------------------------*/
 
 /*------------------------------------- ENUMS ------------------------------------------*/
-typedef enum{
-	PHA_OK = 0,
-	PHA_TIMEOUT,
-}phameas_resp_E;
-/*------------------------------- STRUCT AND PHAONS ------------------------------------*/
 
-typedef struct{
-	uint16_t phase;
-}phaMeasGetS;
+/*------------------------------- STRUCT AND UNIONS ------------------------------------*/
+
 /*======================================================================================*/
 /*                    ####### EXPORTED OBJECT DECLARATIONS #######                      */
 /*======================================================================================*/
-typedef struct{
-	uint16_t phase;
-	uint8_t timeout_flag;
-}phasemeas_filtered_T;
+
 /*======================================================================================*/
 /*                   ####### EXPORTED FUNCTIONS PROTOTYPES #######                      */
 /*======================================================================================*/
-phameas_resp_E PhaMeas_Init(void);
-phameas_resp_E PhaMeas_Get(void);
+
 /*======================================================================================*/
 /*                          ####### INLINE FUNCTIONS #######                            */
 /*======================================================================================*/
 
 /**
- * @} end of group Phameas
+ * @} end of group memory.h
  */
 
 #ifdef __cplusplus
 }
 #endif
-#endif /* PHAMEAS_H_ */
-
-
-
-
+#endif /* memory.h_H */

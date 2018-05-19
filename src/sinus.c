@@ -24,9 +24,9 @@ void PIN_Config(void);
 /*
  * EXPORTED:
  */
-void SIN_Config(void)
+void SIN_Init(void)
 {
-	Pin_Config();
+	PIN_Config();
 	DAC_Config();
 	TIM_Config();
 }

@@ -22,7 +22,6 @@ void Timer_Reset(uint8_t* id);
 void Timer_Stop(uint8_t* id);
 void Timer_Run(uint8_t* id);
 int8_t Timer_Register(uint8_t* id,uint16_t period, timerOpt_E option);
-
-void Timer_Handler(void);
+void TIM2_IRQHandler();
 
 #endif /* TIMER_H_ */

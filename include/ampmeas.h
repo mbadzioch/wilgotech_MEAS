@@ -40,35 +40,35 @@ extern "C" {
 typedef enum{
 	AMP_AVG = 0x01,
 	AMP_SET_DONE = 0x80
-}ampMeasOptE;
+}ampmeas_opt_E;
 
 typedef enum{
 	AMP_OK = 0,
 	AMP_TIMEOUT,
 	AMP_NOSET,
-	AMP_ERR2
-}ampMeasResp;
+	AMP_NOTUSED
+}ampmeas_resp_E;
 /*------------------------------- STRUCT AND UNIONS ------------------------------------*/
-typedef struct{
-	uint16_t period;
-	ampMeasOptE ampMeasOpt;
-}ampMeasSetS;
 
-typedef struct{
-	double measVal;
-}ampMeasGetS;
 /*======================================================================================*/
 /*                    ####### EXPORTED OBJECT DECLARATIONS #######                      */
 /*======================================================================================*/
+typedef struct{
 
+	uint16_t amplitudeCapacitor;
+	uint16_t amplitudeResistor;
+	uint16_t wheatTemperature;
+	uint16_t batteryVoltage;
+
+} ampmeas_filtered_data_T;
 /*======================================================================================*/
 /*                   ####### EXPORTED FUNCTIONS PROTOTYPES #######                      */
 /*======================================================================================*/
-ampMeasResp AmpMeas_Init(void);
-ampMeasResp AmpMeas_Start(void);
-ampMeasResp AmpMeas_Stop(void);
-ampMeasResp AmpMeas_Set(ampMeasSetS* ampMeasSet);
-ampMeasResp AmpMeas_Get(ampMeasGetS* ampMeasGet);
+ampmeas_resp_E AmpMeas_Init(void);
+ampmeas_resp_E AmpMeas_Start(void);
+ampmeas_resp_E AmpMeas_Stop(void);
+ampmeas_resp_E AmpMeas_Set(void);
+ampmeas_resp_E AmpMeas_Get(void);
 /*======================================================================================*/
 /*                          ####### INLINE FUNCTIONS #######                            */
 /*======================================================================================*/

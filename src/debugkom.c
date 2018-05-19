@@ -15,17 +15,25 @@
 #include "main.h"
 #include "timer.h"
 #include "rtc.h"
+#include "ampmeas.h"
+#include "phasemeas.h"
+
+
 #define UART_FTDI 1
 #define UART_DEBUG 1
 
 char *err[]={" OK "," Blad 1 "," Blad 2 "," Blad 3 "," Timeout "};
 char *state[]={" A "," B "," C "," D "," E "};
 
-static enum {DTIME,DSIL,DAKC,DKAL,DST,DPOW,DREG}msgFormat=DTIME;
+static enum {DTIME,DATA,DAKC,DKAL,DST,DPOW,DREG}msgFormat=DATA;
 
 volatile uint8_t debugBuf[DEBUG_BUF_LENGTH],debugOVF=0,debugBufRDY=0;
 volatile uint16_t debugBufCnt=0;
 uint8_t debugTimer;
+
+
+extern ampmeas_filtered_data_T ampmeas_filtered_data_S;
+extern phasemeas_filtered_T phasemeas_filtered_S;
 
 
 static void Debug_InputHandler(void);
@@ -49,15 +57,24 @@ void Debug_Main(void)
 {
 	Debug_InputHandler();
 	if(Timer_Check(&debugTimer)==1){
-		Debug_Raport();
+		//Debug_Raport();
 	}
 }
+
 static void Debug_Raport(void)
 {
 	switch(msgFormat){
 	case DTIME:
 		RTC_GetDateTime(&sTime);
 		sprintf(cbuf,"%.2d-%.2d-%2d %.2d:%.2d:%.2d \n\r",sTime.date,sTime.month,sTime.year,sTime.hours,sTime.minutes,sTime.seconds);
+		PC_Debug(cbuf);
+		break;
+
+	case DATA:
+		RTC_GetDateTime(&sTime);
+
+		sprintf(cbuf,"%.2d:%.2d:%.2d AmpR: %d AmpC: %d Bat: %d Faza: %d\n\r",sTime.hours,sTime.minutes,sTime.seconds,ampmeas_filtered_data_S.amplitudeResistor,
+				ampmeas_filtered_data_S.amplitudeResistor,ampmeas_filtered_data_S.batteryVoltage,phasemeas_filtered_S.phase);
 		PC_Debug(cbuf);
 		break;
 	default:
@@ -134,7 +151,7 @@ static void Debug_InputHandler(void)
 				msgFormat=DTIME;
 			}
 			else if(debugBuf[1] == 'S'){
-				msgFormat=DSIL;
+				msgFormat=DATA;
 			}
 			else if(debugBuf[1] == 'L'){
 				msgFormat=DAKC;

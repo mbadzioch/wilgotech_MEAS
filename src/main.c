@@ -1,11 +1,12 @@
 
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stm32f30x_conf.h>
 #include <stm32f30x.h>
 #include <string.h>
+#include "measure.h"
 #include "delay.h"
-#include "pomiar.h"
 #include "debugkom.h"
 #include "rtc.h"
 #include "led.h"
@@ -23,19 +24,23 @@
 
 uint8_t mainTim;
 
+
 int main(void)
 {
 	SystemInit();
 	DelayInit();
-	Debug_Init();
-	Measure_Config();
-	RTC_Config(&sTime);
 	Timer_Init();
+	Debug_Init();
+	Measure_Init();
+	RTC_Config(&sTime);
+
+
 
 	LED_Green(MEDIUM);
 	while(1)
 	{
 		Debug_Main();
+		Measure_Main();
 //		if(Timer_Check(&mainTim)==1){
 //			RTC_GetDateTime(&sTime);
 //			sprintf(cBuf,"%.2d-%.2d-%2d %.2d:%.2d:%.2d \n\r",sTime.date,sTime.month,sTime.year,sTime.hours,sTime.minutes,sTime.seconds);

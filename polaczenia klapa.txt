@@ -1,0 +1,7 @@
+od lewej:
+
+bialy
+czerwony
+czarny
+brazowy
+niebieski

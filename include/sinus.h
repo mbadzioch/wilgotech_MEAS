@@ -11,6 +11,6 @@
 
 void SIN_On(void);
 void SIN_Off(void);
-void SIN_Config(void);
+void SIN_Init(void);
 
 #endif /* SINUS_H_ */
