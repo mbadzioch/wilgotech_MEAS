@@ -10,8 +10,8 @@
 #include "debugkom.h"
 #include "rtc.h"
 #include "led.h"
-#include "main.h"
 #include "timer.h"
+#include "memory.h"
 
 /*
  * 	Wykorzystanie TIMERów:
@@ -32,22 +32,14 @@ int main(void)
 	Timer_Init();
 	Debug_Init();
 	Measure_Init();
-	RTC_Config(&sTime);
+	RTC_Initialize();
+	Memory_Init();
 
-
-
-	LED_Green(MEDIUM);
 	while(1)
 	{
 		Debug_Main();
 		Measure_Main();
-//		if(Timer_Check(&mainTim)==1){
-//			RTC_GetDateTime(&sTime);
-//			sprintf(cBuf,"%.2d-%.2d-%2d %.2d:%.2d:%.2d \n\r",sTime.date,sTime.month,sTime.year,sTime.hours,sTime.minutes,sTime.seconds);
-//			PC_Send(cBuf);
-//			//Measure_Sequence(&sTime);
-//			//Measure_CallibSequence(&sTime,0);
-//		}
+
 	}
 }
 

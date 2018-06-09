@@ -28,12 +28,15 @@
 #include "debugkom.h"
 #include "sinus.h"
 #include "led.h"
+#include "rtc.h"
+#include "memory.h"
 /*----------------------------- LOCAL OBJECT-LIKE MACROS -------------------------------*/
-#define MEAS_VAL_TIME_MS 2000  // 1000 - 1s
-#define MEAS_REC_TIME_MS 10000 // 60000 - 60s
+#define MEAS_VAL_TIME_S 2  //  2s
+#define MEAS_REC_TIME_S 60 //  60s
 
-#define MEAS_FLOW_REC_NUM_INIT 2
-#define MEAS_MOIST_REC_NUM_INIT 2
+#define MEAS_FLOW_REC_NUM_INIT 15   // 15 x REC_TIME
+#define MEAS_MOIST_REC_NUM_INIT 3  // 3 x REC_TIME
+
 /*---------------------------- LOCAL FUNCTION-LIKE MACROS ------------------------------*/
 
 /*======================================================================================*/
@@ -60,7 +63,7 @@ static measure_state_T Measure_FlapOpen(void);
 static measure_state_T Measure_Flow(void);
 static measure_state_T Measure_FlapClose(void);
 static measure_state_T Measure_Moist(void);
-
+static uint8_t Measure_RtcTimer(uint8_t resetFlag);
 				// Sub routines:
 static void Measure_AccumulateResults(void);
 static void Measure_AccClear(void);
@@ -73,17 +76,20 @@ static void Measure_Output(measures_out_T out_type);
 /*--------------------------------- EXPORTED OBJECTS -----------------------------------*/
 uint8_t measure_idle_flag=0;
 
+measure_set_T measure_settings;
 measure_record_T measure_current_record;
 
 extern ampmeas_filtered_data_T ampmeas_filtered_data;
 extern phasemeas_filtered_T phasemeas_filtered_data;
 extern thmeas_data_T thmeas_data;
+extern rtc_time_T rtc_current_time;
+
 /*---------------------------------- LOCAL OBJECTS -------------------------------------*/
 measure_state_T measure_state;
 measure_set_T measure_settings;
 
 
-uint8_t recTim,curValTim;
+//uint8_t recTim,curValTim;
 
 uint16_t acc_cnt;
 uint32_t measure_data_acc[4]; // Acc for Phase, AmpR, AmpC, TempZ
@@ -102,8 +108,8 @@ void Measure_Init(void)
 	LED_Init();
 	FLAP_Init();
 
-	Timer_Register(&curValTim,MEAS_VAL_TIME_MS,timerOpt_AUTORESET);
-	Timer_Register(&recTim,MEAS_REC_TIME_MS,timerOpt_AUTORESET);
+	//Timer_Register(&curValTim,MEAS_VAL_TIME_MS,timerOpt_AUTORESET);
+	//Timer_Register(&recTim,MEAS_REC_TIME_MS,timerOpt_AUTORESET);
 
 	measure_state=MEAS_IDLE;
 
@@ -129,21 +135,27 @@ void Measure_Main()
 	switch(measure_state){
 
 	case MEAS_IDLE:
+		LED_Green(LED_OFF);
 		measure_state = Measure_Idle();
 		break;
 	case MEAS_FLAPOPEN:
+		LED_Green(LED_FAST);
 		measure_state = Measure_FlapOpen();
 		break;
 	case MEAS_FLOW:
+		LED_Green(LED_MEDIUM);
 		measure_state = Measure_Flow();
 		break;
 	case MEAS_FLAPCLOSE:
+		LED_Green(LED_FAST);
 		measure_state = Measure_FlapClose();
 		break;
 	case MEAS_MOIST:
+		LED_Green(LED_MEDIUM);
 		measure_state = Measure_Moist();
 		break;
 	case MEAS_ERROR:
+		LED_Green(LED_SLOW);
 		break;
 	default:
 		break;
@@ -160,6 +172,8 @@ static measure_state_T Measure_Idle(void)
 	if(measure_settings.idle_flag == 1){
 		return MEAS_IDLE;
 	}
+	// TODO: DEBUG
+	PC_Debug("OPENING\n\r");
 	return MEAS_FLAPOPEN;
 }
 static measure_state_T Measure_FlapOpen(void)
@@ -174,8 +188,7 @@ static measure_state_T Measure_FlapOpen(void)
 		if(measure_idle_flag==1){
 			return MEAS_IDLE;
 		}
-		Timer_Reset(&recTim);
-		Timer_Reset(&curValTim);
+		Measure_RtcTimer(1);
 		// TODO: DEBUG
 		PC_Debug("OPENED\n\r");
 		return MEAS_FLOW;
@@ -187,20 +200,28 @@ static measure_state_T Measure_Flow(void)
 	static uint8_t flow_rec_cnt;
 
 	Measure_AccumulateResults();
-	//PC_Debug("F");
-	if(Timer_Check(&recTim) == 1){
+
+	switch(Measure_RtcTimer(0)){
+	case 0:
+		break;
+	case 1:
+		Measure_CalcRec(CALC_FLOW);
+		Measure_Output(OUT_SEND);
+		break;
+	case 2:
 		Measure_CalcRec(CALC_FLOW);
 		Measure_Output(OUT_SAVESEND);
 		Measure_AccClear();
 		flow_rec_cnt++;
-	}
-	else if(Timer_Check(&curValTim) == 1){
-		Measure_CalcRec(CALC_FLOW);
-		Measure_Output(OUT_SEND);
+		break;
+	default:
+		break;
 	}
 
 	if(flow_rec_cnt >= measure_settings.flow_rec_num){
 		flow_rec_cnt=0;
+		// TODO: DEBUG
+		PC_Debug("CLOSING\n\r");
 		return MEAS_FLAPCLOSE;
 	}
 	return MEAS_FLOW;
@@ -214,8 +235,7 @@ static measure_state_T Measure_FlapClose(void)
 		return MEAS_FLAPCLOSE;
 	}
 	else if(flap_state == FLAP_CLOSED){
-		Timer_Reset(&recTim);
-		Timer_Reset(&curValTim);
+		Measure_RtcTimer(1);
 		// TODO: DEBUG
 		PC_Debug("CLOSED\n\r");
 		return MEAS_MOIST;
@@ -228,19 +248,27 @@ static measure_state_T Measure_Moist(void)
 
 	Measure_AccumulateResults();
 
-	if(Timer_Check(&recTim) == 1){
+	switch(Measure_RtcTimer(0)){
+	case 0:
+		break;
+	case 1:
+		Measure_CalcRec(CALC_MOIST);
+		Measure_Output(OUT_SEND);
+		break;
+	case 2:
 		Measure_CalcRec(CALC_MOIST);
 		Measure_Output(OUT_SAVESEND);
 		Measure_AccClear();
 		moist_rec_cnt++;
-	}
-	else if(Timer_Check(&curValTim) == 1){
-		Measure_CalcRec(CALC_MOIST);
-		Measure_Output(OUT_SEND);
+		break;
+	default:
+		break;
 	}
 
 	if(moist_rec_cnt >= measure_settings.moist_rec_num){
 		moist_rec_cnt=0;
+		// TODO: DEBUG
+		PC_Debug("OPENING\n\r");
 		return MEAS_FLAPOPEN;
 	}
 	return MEAS_MOIST;
@@ -263,8 +291,7 @@ static void Measure_AccumulateResults(void)
 static void Measure_AccClear(void)
 {
 	sprintf(cbuf,"CNT: %d",acc_cnt);
-	// TODO: DEBUG
-	PC_Debug(cbuf);
+
 	measure_data_acc[ACC_PHASE]=0;
 	measure_data_acc[ACC_AMP_C]=0;
 	measure_data_acc[ACC_AMP_R]=0;
@@ -274,14 +301,9 @@ static void Measure_AccClear(void)
 static void Measure_CalcRec(measure_calc_T calc_type)
 {
 	ThMeas_Get();
+	RTC_GetDateTime();
 
-	//TODO: Jak skonczysz poprawiac RTC to trzeba tu dodac kalkulacje timestampu
-//	int d    = 19   ; //Day     1-31
-//	int m    = 5    ; //Month   1-12`
-//	int y    = 2018 ; //Year    2013`
-//	weekday = (d += m < 3 ? y-- : y - 2, 23*m/9 + d + 4 + y/4- y/100 + y/400)%7;
-
-	measure_current_record.timestamp = 011532;
+	measure_current_record.timestamp = rtc_current_time.timestamp;
 
 	measure_current_record.phase = measure_data_acc[ACC_PHASE] / acc_cnt;
 	measure_current_record.amp_c = measure_data_acc[ACC_AMP_C] / acc_cnt;
@@ -303,10 +325,10 @@ static void Measure_CalcRec(measure_calc_T calc_type)
 
 static void Measure_Output(measures_out_T out_type)
 {
-
 	if(out_type == OUT_SEND){
 		// TODO: DEBUG
-		sprintf(cbuf,"SEND: %d\n\r%d %d %d %d %d %d %d %d %d %d\n\n\r",measure_current_record.timestamp,
+		sprintf(cbuf,"SEND: %d %d:%d\n\r%d %d %d %d %d %d %d %d %d %d\n\n\r",measure_current_record.timestamp/10000,
+				(measure_current_record.timestamp%10000)/100,measure_current_record.timestamp%100,
 				measure_current_record.phase,
 				measure_current_record.amp_c,measure_current_record.amp_r,
 				measure_current_record.temp_z,measure_current_record.temp_in,
@@ -324,10 +346,58 @@ static void Measure_Output(measures_out_T out_type)
 				measure_current_record.hum_in,measure_current_record.temp_out,
 				measure_current_record.hum_out,measure_current_record.flow,
 				measure_current_record.moist);
-		PC_Debug(cbuf);
+		//PC_Debug(cbuf);
+
+		if(Memory_SaveRec() == MEM_OK){
+			PC_Debug(cbuf);
+		}
+		else{
+			PC_Debug("MEM_ERR!\n\r");
+		}
 	}
 }
 
+/*
+ * RTC Based Timer
+ *
+ * Returns:
+ *
+ *  0 - running
+ *  1 - send values
+ *  2 - save and send record
+ *
+ */
+static uint8_t Measure_RtcTimer(uint8_t resetFlag)
+{
+	static uint8_t lastSecond;
+	static uint8_t valuesCounter = MEAS_VAL_TIME_S;
+	static uint8_t recordCounter = MEAS_REC_TIME_S;
+
+	if(resetFlag == 1){
+		valuesCounter = MEAS_VAL_TIME_S;
+		recordCounter = MEAS_REC_TIME_S;
+		return 0;
+	}
+
+	RTC_GetCurrentSecond();
+
+	if(lastSecond != rtc_current_time.seconds){
+		valuesCounter--;
+		recordCounter--;
+		lastSecond = rtc_current_time.seconds;
+	}
+
+	if(recordCounter == 0){
+		valuesCounter = MEAS_VAL_TIME_S;
+		recordCounter = MEAS_REC_TIME_S;
+		return 2;
+	}
+	else if(valuesCounter == 0){
+		valuesCounter = MEAS_VAL_TIME_S;
+		return 1;
+	}
+	return 0;
+}
 /*
  * Legacy sequence
  */

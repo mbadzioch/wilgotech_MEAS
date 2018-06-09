@@ -8,7 +8,6 @@
 #include <stdlib.h>
 #include <stm32f30x_conf.h>
 #include <stm32f30x.h>
-#include "main.h"
 #include "led.h"
 
 
@@ -71,34 +70,34 @@ void LED_Init(void)
 void LED_Green(blinkLedE blinkingFreq)
 {
 	switch(blinkingFreq){
-		case OFF:
+		case LED_OFF:
 			LED_GreenFreq = 0;
 			GPIO_ResetBits(GPIOA,GPIO_Pin_8);
 			break;
-		case ON:
+		case LED_ON:
 			LED_GreenFreq = 0;
 			GPIO_SetBits(GPIOA,GPIO_Pin_8);
 			break;
-		case SLOW:
+		case LED_SLOW:
 			LED_GreenFreq = 100;
 			break;
-		case MEDIUM:
+		case LED_MEDIUM:
 			LED_GreenFreq = 40;
 			break;
-		case FAST:
+		case LED_FAST:
 			LED_GreenFreq = 4;
 			break;
-		case ONEBLINKS:
+		case LED_ONEBLINKS:
 			LED_GBFlag=1;
 			LED_GreenFreq = 7;
 			LED_GreenBlinkNum = 1;
 			break;
-		case THREEBLINKS:
+		case LED_THREEBLINKS:
 			LED_GBFlag=1;
 			LED_GreenFreq = 7;
 			LED_GreenBlinkNum = 3;
 			break;
-		case FIVEBLINKS:
+		case LED_FIVEBLINKS:
 			LED_GBFlag=1;
 			LED_GreenFreq = 7;
 			LED_GreenBlinkNum = 5;
@@ -110,34 +109,34 @@ void LED_Green(blinkLedE blinkingFreq)
 void LED_Red(blinkLedE blinkingFreq)
 {
 	switch(blinkingFreq){
-		case OFF:
+		case LED_OFF:
 			LED_RedFreq = 0;
 			GPIO_ResetBits(GPIOC,GPIO_Pin_9);
 			break;
-		case ON:
+		case LED_ON:
 			LED_RedFreq = 0;
 			GPIO_SetBits(GPIOC,GPIO_Pin_9);
 			break;
-		case SLOW:
+		case LED_SLOW:
 			LED_RedFreq = 100;
 			break;
-		case MEDIUM:
+		case LED_MEDIUM:
 			LED_RedFreq = 40;
 			break;
-		case FAST:
+		case LED_FAST:
 			LED_RedFreq = 4;
 			break;
-		case ONEBLINKS:
+		case LED_ONEBLINKS:
 			LED_RBFlag=1;
 			LED_RedFreq = 7;
 			LED_RedBlinkNum = 1;
 			break;
-		case THREEBLINKS:
+		case LED_THREEBLINKS:
 			LED_RBFlag=1;
 			LED_RedFreq = 7;
 			LED_RedBlinkNum = 3;
 			break;
-		case FIVEBLINKS:
+		case LED_FIVEBLINKS:
 			LED_RBFlag=1;
 			LED_RedFreq = 7;
 			LED_RedBlinkNum = 5;
@@ -149,34 +148,34 @@ void LED_Red(blinkLedE blinkingFreq)
 void LED_Blue(blinkLedE blinkingFreq)
 {
 	switch(blinkingFreq){
-		case OFF:
+		case LED_OFF:
 			LED_BlueFreq = 0;
 			GPIO_ResetBits(GPIOC,GPIO_Pin_10);
 			break;
-		case ON:
+		case LED_ON:
 			LED_BlueFreq = 0;
 			GPIO_SetBits(GPIOC,GPIO_Pin_10);
 			break;
-		case SLOW:
+		case LED_SLOW:
 			LED_BlueFreq = 100;
 			break;
-		case MEDIUM:
+		case LED_MEDIUM:
 			LED_BlueFreq = 40;
 			break;
-		case FAST:
+		case LED_FAST:
 			LED_BlueFreq = 4;
 			break;
-		case ONEBLINKS:
+		case LED_ONEBLINKS:
 			LED_BBFlag=1;
 			LED_BlueFreq = 7;
 			LED_BlueBlinkNum = 1;
 			break;
-		case THREEBLINKS:
+		case LED_THREEBLINKS:
 			LED_BBFlag=1;
 			LED_BlueFreq = 7;
 			LED_BlueBlinkNum = 3;
 			break;
-		case FIVEBLINKS:
+		case LED_FIVEBLINKS:
 			LED_BBFlag=1;
 			LED_BlueFreq = 7;
 			LED_BlueBlinkNum = 5;

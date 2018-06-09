@@ -10,8 +10,8 @@
 /*----------------------- DEFINE TO PREVENT RECURSIVE INCLUSION ------------------------*/
 
 
-#ifndef flapcrtl.h_H
-#define flapcrtl.h_H
+#ifndef flapcrtl_H
+#define flapcrtl_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -29,7 +29,6 @@ extern "C" {
 /*-------------------------------- INCLUDE DIRECTIVES ----------------------------------*/
 #include "stdio.h"
 /*----------------------------- LOCAL OBJECT-LIKE MACROS -------------------------------*/
-#define FLAP_OPEN_TIMEOUT	30		// In sec
 /*---------------------------- LOCAL FUNCTION-LIKE MACROS ------------------------------*/
 
 /*======================================================================================*/
@@ -38,7 +37,8 @@ extern "C" {
 /*---------------------------- ALL TYPE DECLARATIONS -----------------------------------*/
 
 /*------------------------------------- ENUMS ------------------------------------------*/
-typedef enum {FLAP_OPENED,FLAP_OPENING,FLAP_CLOSED,FLAP_CLOSING,FLAP_ERROR}flap_state_T;
+typedef enum {FLAP_INIT,FLAP_OPENED,FLAP_OPENING,FLAP_CLOSED,FLAP_CLOSING,
+				FLAP_ERROR}flap_state_T;
 typedef enum {FLAP_CMD_OPEN,FLAP_CMD_CLOSE}flap_cmd_T;
 /*------------------------------- STRUCT AND UNIONS ------------------------------------*/
 
@@ -63,4 +63,4 @@ flap_state_T FLAP_Control(flap_cmd_T flap_cmd_set);
 #ifdef __cplusplus
 }
 #endif
-#endif /* flapcrtl.h_H */
+#endif /* flapcrtl_H */

@@ -7,27 +7,35 @@
 
 
 #include "rtc.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <stm32f30x_conf.h>
+#include <stm32f30x.h>
+#include "integer.h"
 
 RTC_InitTypeDef RTC_InitStructure;
 RTC_TimeTypeDef RTC_TimeStructure;
 RTC_DateTypeDef RTC_DateStructure;
 
-void RTC_Initialization(void);
-void RTC_DefaultTime(sTimeS* sTime);
+rtc_time_T rtc_current_time;
 
-void RTC_Config(sTimeS* sTime)
+
+void RTC_Config(void);
+void RTC_DefaultTime();
+
+void RTC_Initialize()
 {
 	if (RTC_ReadBackupRegister(RTC_BKP_DR0) != 0x32F2)
 	{
 		/* RTC configuration  */
-		RTC_Initialization();
+		RTC_Config();
 		/* Configure the RTC data register and RTC prescaler */
 		RTC_InitStructure.RTC_AsynchPrediv = RTC_ASYNC_PREDIV;
 		RTC_InitStructure.RTC_SynchPrediv = RTC_SYNC_PREDIV;
 		RTC_InitStructure.RTC_HourFormat = RTC_HourFormat_24;
 
-		RTC_DefaultTime(sTime);
-		RTC_SetDateTime(sTime);
+		RTC_DefaultTime();
+		RTC_SetDateTime();
 
 		/* Indicator for the RTC configuration */
 		RTC_WriteBackupRegister(RTC_BKP_DR0, 0x32F2);
@@ -44,7 +52,7 @@ void RTC_Config(sTimeS* sTime)
 		RTC_WaitForSynchro();
 	}
 }
-void RTC_Initialization(void)
+void RTC_Config(void)
 {
 	/* Enable the PWR clock */
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR, ENABLE);
@@ -67,24 +75,24 @@ void RTC_Initialization(void)
 	/* Wait for RTC APB registers synchronisation */
 	RTC_WaitForSynchro();
 }
-void RTC_SetDateTime(sTimeS* sTime)
+void RTC_SetDateTime()
 {
 	RTC_TimeTypeDef time;
 	RTC_DateTypeDef date;
 
 	time.RTC_H12=RTC_H12_AM;
-	time.RTC_Hours=sTime->hours;
-	time.RTC_Minutes=sTime->minutes;
-	time.RTC_Seconds=sTime->seconds;
-	date.RTC_Year=sTime->year;
-	date.RTC_Month=sTime->month;
-	//date.RTC_WeekDay=sTime->weekday;
-	date.RTC_Date=sTime->date;
+	time.RTC_Hours=rtc_current_time.hours;
+	time.RTC_Minutes=rtc_current_time.minutes;
+	time.RTC_Seconds=rtc_current_time.seconds;
+	date.RTC_Year=rtc_current_time.year;
+	date.RTC_Month=rtc_current_time.month;
+	date.RTC_WeekDay=rtc_current_time.weekday+1; // DEF for ST is 1 = Monday, we need start from 0
+	date.RTC_Date=rtc_current_time.date;
 
 	RTC_SetTime(RTC_Format_BIN,&time);
 	RTC_SetDate(RTC_Format_BIN,&date);
 }
-void RTC_GetDateTime(sTimeS* sTime)
+void RTC_GetDateTime()
 {
 	RTC_TimeTypeDef time;
 	RTC_DateTypeDef date;
@@ -92,25 +100,34 @@ void RTC_GetDateTime(sTimeS* sTime)
 	RTC_GetTime(RTC_Format_BIN,&time);
 	RTC_GetDate(RTC_Format_BIN,&date);
 
-	sTime->hours=time.RTC_Hours;
-	sTime->minutes=time.RTC_Minutes;
-	sTime->seconds=time.RTC_Seconds;
-	sTime->year=date.RTC_Year;
-	sTime->month=date.RTC_Month;
-	//sTime->weekday=date.RTC_WeekDay;
-	sTime->date=date.RTC_Date;
-	sTime->hms = time.RTC_Hours*3600+time.RTC_Minutes*60+time.RTC_Seconds;
+	rtc_current_time.hours=time.RTC_Hours;
+	rtc_current_time.minutes=time.RTC_Minutes;
+	rtc_current_time.seconds=time.RTC_Seconds;
+	rtc_current_time.year=date.RTC_Year;
+	rtc_current_time.month=date.RTC_Month;
+	rtc_current_time.weekday=date.RTC_WeekDay-1;// DEF for ST is 1 = Monday, we need start from 0
+	rtc_current_time.date=date.RTC_Date;
 
+	rtc_current_time.timestamp = (uint16_t)rtc_current_time.weekday*10000;
+	rtc_current_time.timestamp += (uint16_t)rtc_current_time.hours*100;
+	rtc_current_time.timestamp += (uint16_t)rtc_current_time.minutes;
 }
-void RTC_DefaultTime(sTimeS* sTime)
+void RTC_GetCurrentSecond()
 {
-	sTime->hours=RTC_DEF_HOUR;
-	sTime->minutes=RTC_DEF_MINUTE;
-	sTime->seconds=RTC_DEF_SECOND;
-	sTime->year=RTC_DEF_YEAR;
-	sTime->month=RTC_DEF_MONTH;
-	//sTime->weekday=RTC_DEF_WEEKDAY;
-	sTime->date=RTC_DEF_DATE;
+	RTC_TimeTypeDef time;
+
+	RTC_GetTime(RTC_Format_BIN,&time);
+	rtc_current_time.seconds=time.RTC_Seconds;
+}
+void RTC_DefaultTime()
+{
+	rtc_current_time.hours=RTC_DEF_HOUR;
+	rtc_current_time.minutes=RTC_DEF_MINUTE;
+	rtc_current_time.seconds=RTC_DEF_SECOND;
+	rtc_current_time.year=RTC_DEF_YEAR;
+	rtc_current_time.month=RTC_DEF_MONTH;
+	rtc_current_time.weekday=RTC_DEF_WEEKDAY;
+	rtc_current_time.date=RTC_DEF_DATE;
 }
 
 /*---------------------------------------------------------*/

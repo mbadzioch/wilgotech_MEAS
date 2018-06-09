@@ -12,12 +12,11 @@
 #include <string.h>
 #include "stm32f30x_conf.h"
 #include "debugkom.h"
-#include "main.h"
 #include "timer.h"
 #include "rtc.h"
 #include "ampmeas.h"
 #include "phasemeas.h"
-
+#include "memory.h"
 
 #define UART_FTDI 1
 #define UART_DEBUG 1
@@ -31,10 +30,12 @@ volatile uint8_t debugBuf[DEBUG_BUF_LENGTH],debugOVF=0,debugBufRDY=0;
 volatile uint16_t debugBufCnt=0;
 uint8_t debugTimer;
 
+debugkom_record_T debug_record;
 
 extern ampmeas_filtered_data_T ampmeas_filtered_data_S;
 extern phasemeas_filtered_T phasemeas_filtered_S;
 
+char cbuf[64];
 
 static void Debug_InputHandler(void);
 static void Debug_Raport(void);
@@ -48,7 +49,7 @@ void Debug_Init(void)
 
 	Uart_Init();
 	Uart_BufClr();
-	if(Timer_Register(&debugTimer,500,timerOpt_AUTORESET) != 1)PC_Debug("Blad rejestracji timera!\n\r");
+	if(Timer_Register(&debugTimer,1000,timerOpt_AUTORESET) != 1)PC_Debug("Blad rejestracji timera!\n\r");
 	PC_Debug("WilgotechMeasure  v2.0\n\r");
 }
 
@@ -63,19 +64,17 @@ void Debug_Main(void)
 
 static void Debug_Raport(void)
 {
+
+
 	switch(msgFormat){
 	case DTIME:
-		RTC_GetDateTime(&sTime);
-		sprintf(cbuf,"%.2d-%.2d-%2d %.2d:%.2d:%.2d \n\r",sTime.date,sTime.month,sTime.year,sTime.hours,sTime.minutes,sTime.seconds);
+		//sprintf(cbuf,"%.2d-%.2d-%2d %.2d:%.2d:%.2d \n\r",sTime.date,sTime.month,sTime.year,sTime.hours,sTime.minutes,sTime.seconds);
 		PC_Debug(cbuf);
 		break;
 
 	case DATA:
-		RTC_GetDateTime(&sTime);
-
-		sprintf(cbuf,"%.2d:%.2d:%.2d AmpR: %d AmpC: %d Bat: %d Faza: %d\n\r",sTime.hours,sTime.minutes,sTime.seconds,ampmeas_filtered_data_S.amplitudeResistor,
-				ampmeas_filtered_data_S.amplitudeResistor,ampmeas_filtered_data_S.batteryVoltage,phasemeas_filtered_S.phase);
-		PC_Debug(cbuf);
+		//sprintf(cbuf,"%.2d:%.2d:%.2d AmpR: %d AmpC: %d Bat: %d Faza: %d\n\r",sTime.hours,sTime.minutes,sTime.seconds,ampmeas_filtered_data_S.amplitudeResistor,
+		//		ampmeas_filtered_data_S.amplitudeResistor,ampmeas_filtered_data_S.batteryVoltage,phasemeas_filtered_S.phase);
 		break;
 	default:
 		break;
@@ -87,6 +86,7 @@ static void Debug_InputHandler(void)
 {
 	uint8_t p;
 	uint16_t temp=0;
+	uint16_t cnt=0;
 
 	if(debugBufRDY==1){
 		debugBufRDY=0;
@@ -99,22 +99,15 @@ static void Debug_InputHandler(void)
 
 		switch(debugBuf[0]){
 		case 'S':
-			if(debugBuf[1] == 'P'){
-				if(debugBuf[2]==' '){
-					p = 3;
-					while(p<50){
-						if((debugBuf[p]=='\r') || (debugBuf[p]=='\n'))break;
-						if(temp!=0)temp*=10;
-						temp=temp+(debugBuf[p]-48);
-						p++;
-					}
-					//Fal_SetSpeed(temp);
-					//sprintf(cbuf,"Falownik GO, speed: %d\n\r",falownikMain.speedSet);
-					PC_Debug(cbuf);
-				}
-			}
-			else{
-				PC_Debug("Falownik STOP\n\r");
+			while(Memory_ReadRecHistory() == MEM_RECNEXT){
+
+				sprintf(cbuf,"HIST %u: %u %u %u %i %i %i %d %d \n\r",cnt,debug_record.timestamp,
+						debug_record.moist,debug_record.flow,debug_record.temp_z,debug_record.temp_in,
+						debug_record.temp_out,debug_record.hum_in,
+						debug_record.hum_out
+						);
+				PC_Debug(cbuf);
+				cnt++;
 			}
 			break;
 		case 'P':

@@ -69,7 +69,7 @@ typedef struct{
 /*                   ####### EXPORTED FUNCTIONS PROTOTYPES #######                      */
 /*======================================================================================*/
 void Measure_Init(void);
-void Measure_Main();
+void Measure_Main(void);
 void Measure_Set(measure_set_T measure_set_S);
 void Measure_CallibSequence(uint8_t mode);
 /*======================================================================================*/

@@ -21,7 +21,6 @@
 #include <stm32f30x_conf.h>
 #include "delay.h"
 #include "debugkom.h"
-#include "main.h"
 #include "timer.h"
 #include "ampmeas.h"
 /*----------------------------- LOCAL OBJECT-LIKE MACROS -------------------------------*/
