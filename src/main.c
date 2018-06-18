@@ -25,6 +25,14 @@
 uint8_t mainTim;
 
 
+/*
+ *
+ * Podłaczenie:
+ *
+ * 	Termometr wewnętrzny - bliżej karty SD
+ * 	Termometr zewnętrzny - bliżej trafa
+ */
+
 int main(void)
 {
 	SystemInit();
@@ -37,7 +45,7 @@ int main(void)
 
 	while(1)
 	{
-		Debug_Main();
+		//Debug_Main();
 		Measure_Main();
 
 	}

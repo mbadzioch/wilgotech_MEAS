@@ -27,13 +27,13 @@ typedef struct{
 #define RTC_ASYNC_PREDIV 0x7F
 
 
-#define RTC_DEF_HOUR	16
-#define RTC_DEF_MINUTE	01
+#define RTC_DEF_HOUR	10
+#define RTC_DEF_MINUTE	38
 #define RTC_DEF_SECOND	0
 #define RTC_DEF_YEAR	18
 #define RTC_DEF_MONTH	6
-#define RTC_DEF_WEEKDAY	5 // DEF for ST is 1 = Monday
-#define RTC_DEF_DATE	8
+#define RTC_DEF_WEEKDAY	5 // 0 - Monday
+#define RTC_DEF_DATE	9
 
 
 void RTC_Initialize();

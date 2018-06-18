@@ -28,7 +28,7 @@
 //TODO: Ustawić czas tak by blokował także alarm (także docelowo musi być przesyłane info
 // 		do displaya
 
-#define FLAP_MOVE_TIME 15000 // 15 sec
+#define FLAP_MOVE_TIME 3 // 15 sec
 
 /*---------------------------- LOCAL FUNCTION-LIKE MACROS ------------------------------*/
 
@@ -201,11 +201,9 @@ static void FLAP_CVD(void)
 	GPIO_ResetBits(GPIOC,GPIO_Pin_6);
 	GPIO_ResetBits(GPIOC,GPIO_Pin_7);
 
-	GPIO_ResetBits(GPIOC,GPIO_Pin_6);
-	GPIO_ResetBits(GPIOC,GPIO_Pin_7);
 
 	GPIO_SetBits(GPIOC,GPIO_Pin_6);
-	Delay_ms(5);
+	Delay_ms(50);
 	GPIO_ResetBits(GPIOC,GPIO_Pin_6);
 }
 

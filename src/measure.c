@@ -280,6 +280,7 @@ static void Measure_AccumulateResults(void)
 	AmpMeas_Get();
 	PhaMeas_Get();
 
+
 	if(acc_cnt < 65000){
 		acc_cnt++;
 		measure_data_acc[ACC_PHASE] += phasemeas_filtered_data.phase;
@@ -327,7 +328,7 @@ static void Measure_Output(measures_out_T out_type)
 {
 	if(out_type == OUT_SEND){
 		// TODO: DEBUG
-		sprintf(cbuf,"SEND: %d %d:%d\n\r%d %d %d %d %d %d %d %d %d %d\n\n\r",measure_current_record.timestamp/10000,
+		sprintf(cbuf,"SEND: %d %d:%d\n\rF:%d C:%d R:%d Tz:%d Ti:%d Hi:%d To:%d Ho:%d %d %d\n\n\r",measure_current_record.timestamp/10000,
 				(measure_current_record.timestamp%10000)/100,measure_current_record.timestamp%100,
 				measure_current_record.phase,
 				measure_current_record.amp_c,measure_current_record.amp_r,

@@ -73,8 +73,9 @@ static void Debug_Raport(void)
 		break;
 
 	case DATA:
-		//sprintf(cbuf,"%.2d:%.2d:%.2d AmpR: %d AmpC: %d Bat: %d Faza: %d\n\r",sTime.hours,sTime.minutes,sTime.seconds,ampmeas_filtered_data_S.amplitudeResistor,
+		//sprintf(cbuf,"%.2d:%.2d:%.2d AmpR: %d AmpC: %d Bat: %d Faza: %d\n\r",ampmeas_filtered_data_S.amplitudeResistor,
 		//		ampmeas_filtered_data_S.amplitudeResistor,ampmeas_filtered_data_S.batteryVoltage,phasemeas_filtered_S.phase);
+		//PC_Debug(cbuf);
 		break;
 	default:
 		break;

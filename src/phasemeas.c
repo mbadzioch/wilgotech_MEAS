@@ -84,6 +84,7 @@ phameas_resp_E PhaMeas_Get()
 static void PHA_Measure()
 {
 	uint32_t fiTimeout=0;
+	char cbuf[36];
 	fiMeasOnFlag=1;
 	fiValAvg=0;
 	HRTIM_ITConfig(HRTIM1,0,HRTIM_TIM_IT_CPT2,ENABLE);
