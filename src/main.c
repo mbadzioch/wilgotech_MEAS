@@ -39,13 +39,13 @@ int main(void)
 	DelayInit();
 	Timer_Init();
 	Debug_Init();
-	Measure_Init();
+	//Measure_Init();
 	RTC_Initialize();
-	Memory_Init();
+	//Memory_Init();
 
 	while(1)
 	{
-		//Debug_Main();
+		Debug_Main();
 		Measure_Main();
 
 	}

@@ -159,7 +159,7 @@
 						</tool>
 					</fileInfo>
 					<sourceEntries>
-						<entry excluding="kom.c|unimeas.c|uart.c|mmcbbp.c|diskioFF.c|diskio.c|radio.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
+						<entry excluding="radio_driver.c|kom.c|unimeas.c|uart.c|mmcbbp.c|diskioFF.c|diskio.c|radio.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="system"/>
 					</sourceEntries>
 				</configuration>
@@ -323,7 +323,7 @@
 						</tool>
 					</fileInfo>
 					<sourceEntries>
-						<entry excluding="kom.c|unimeas.c|uart.c|mmcbbp.c|diskioFF.c|diskio.c|radio.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
+						<entry excluding="radio_driver.c|kom.c|unimeas.c|uart.c|mmcbbp.c|diskioFF.c|diskio.c|radio.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="system"/>
 					</sourceEntries>
 				</configuration>

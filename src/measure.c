@@ -328,9 +328,9 @@ static void Measure_Output(measures_out_T out_type)
 {
 	if(out_type == OUT_SEND){
 		// TODO: DEBUG
-		sprintf(cbuf,"SEND: %d %d:%d\n\rF:%d C:%d R:%d Tz:%d Ti:%d Hi:%d To:%d Ho:%d %d %d\n\n\r",measure_current_record.timestamp/10000,
+		sprintf(cbuf,"SEND: %d %d:%d\n\rF:%d %d C:%d R:%d Tz:%d Ti:%d Hi:%d To:%d Ho:%d %d %d\n\n\r",measure_current_record.timestamp/10000,
 				(measure_current_record.timestamp%10000)/100,measure_current_record.timestamp%100,
-				measure_current_record.phase,
+				phasemeas_filtered_data.phase,measure_current_record.phase,
 				measure_current_record.amp_c,measure_current_record.amp_r,
 				measure_current_record.temp_z,measure_current_record.temp_in,
 				measure_current_record.hum_in,measure_current_record.temp_out,

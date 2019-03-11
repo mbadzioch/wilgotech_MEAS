@@ -90,7 +90,7 @@ static void PHA_Measure()
 	HRTIM_ITConfig(HRTIM1,0,HRTIM_TIM_IT_CPT2,ENABLE);
 	while(fiMeasOnFlag){
 		fiTimeout++;
-		if(fiTimeout > 500000){
+		if(fiTimeout > 1000000){
 			phasemeas_filtered_data.timeout_flag=1;
 			break;
 		}

@@ -28,7 +28,7 @@
 //TODO: Ustawić czas tak by blokował także alarm (także docelowo musi być przesyłane info
 // 		do displaya
 
-#define FLAP_MOVE_TIME 3 // 15 sec
+#define FLAP_MOVE_TIME 30000 // 30000 - 30 sec
 
 /*---------------------------- LOCAL FUNCTION-LIKE MACROS ------------------------------*/
 

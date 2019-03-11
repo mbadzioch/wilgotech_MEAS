@@ -50,7 +50,7 @@ void Debug_Init(void)
 	Uart_Init();
 	Uart_BufClr();
 	if(Timer_Register(&debugTimer,1000,timerOpt_AUTORESET) != 1)PC_Debug("Blad rejestracji timera!\n\r");
-	PC_Debug("WilgotechMeasure  v2.0\n\r");
+	PC_Debug("WilgotechMeasure  v3.0\n\r");
 }
 
 
